@@ -7,21 +7,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-// NOTE: DashboardScreen yahan se delete kar diya hai kyunki humne uski alag file bana li hai.
-
-@Composable
-fun SpeedTestScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "⚡ Speed Test (Coming Soon)")
-    }
-}
-
-@Composable
-fun WifiScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text(text = "📡 WiFi Scanner (Coming Soon)")
-    }
-}
+// Dashboard, WiFi aur SpeedTest yahan se DELETE ho chuke hain.
 
 @Composable
 fun SettingsScreen() {

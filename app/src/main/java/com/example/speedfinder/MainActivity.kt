@@ -22,11 +22,10 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 
-// ⬇️ YAHAN HAI ASAL TABDEELI (IMPORTS)
-// Hum nayi Dashboard file aur purani AppScreens file dono import kar rahe hain
+// ⬇️ YAHAN HAI TABDEELI (Sahi Imports)
 import com.example.speedfinder.presentation.dashboard.DashboardScreen
-import com.example.speedfinder.presentation.SpeedTestScreen
-import com.example.speedfinder.presentation.WifiScreen
+import com.example.speedfinder.presentation.wifi.WifiScreen
+import com.example.speedfinder.presentation.speedtest.SpeedTestScreen // <--- YE NAYA HAI
 import com.example.speedfinder.presentation.SettingsScreen
 
 class MainActivity : ComponentActivity() {
@@ -80,12 +79,12 @@ fun SpeedFinderApp() {
             startDestination = "dashboard",
             modifier = Modifier.padding(innerPadding)
         ) {
-            // Ab ye naya wala DashboardScreen load karega jis mein BUTTONS hain
             composable("dashboard") { DashboardScreen() }
-
-            // Ye abhi bhi purane hain (Phase 4 mein banenge)
-            composable("speedtest") { SpeedTestScreen() }
             composable("wifi") { WifiScreen() }
+
+            // Ab ye naye folder (presentation/speedtest) se load hoga
+            composable("speedtest") { SpeedTestScreen() }
+
             composable("settings") { SettingsScreen() }
         }
     }
