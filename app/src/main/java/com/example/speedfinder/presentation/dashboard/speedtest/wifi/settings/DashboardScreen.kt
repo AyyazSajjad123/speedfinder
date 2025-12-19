@@ -16,10 +16,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView // ✅ Added
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import com.example.speedfinder.data.DataUsageHelper
 import com.example.speedfinder.data.service.SpeedMonitorService
+import com.google.android.gms.ads.AdRequest // ✅ Added
+import com.google.android.gms.ads.AdSize    // ✅ Added
+import com.google.android.gms.ads.AdView    // ✅ Added
 
 @Composable
 fun DashboardScreen() {
@@ -52,7 +56,7 @@ fun DashboardScreen() {
     }
 
     Box(modifier = Modifier.fillMaxSize().padding(16.dp), contentAlignment = Alignment.TopCenter) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxSize()) {
             Text("SpeedFinder Dashboard", fontSize = 24.sp, fontWeight = FontWeight.Bold)
             Spacer(modifier = Modifier.height(20.dp))
 
@@ -99,6 +103,20 @@ fun DashboardScreen() {
                     context.stopService(Intent(context, SpeedMonitorService::class.java))
                 }) { Text("Stop") }
             }
+
+            // ⬇️ BANNER AD LOGIC (Added at the bottom)
+            Spacer(modifier = Modifier.weight(1f)) // Push Ad to bottom
+            Text("Sponsored", fontSize = 10.sp, color = Color.Gray)
+            AndroidView(
+                factory = { context ->
+                    AdView(context).apply {
+                        setAdSize(AdSize.BANNER)
+                        adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test ID
+                        loadAd(AdRequest.Builder().build())
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
         }
 
         // --- DIALOG BOX ---

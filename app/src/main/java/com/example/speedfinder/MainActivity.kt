@@ -27,10 +27,12 @@ import com.example.speedfinder.presentation.dashboard.DashboardScreen
 import com.example.speedfinder.presentation.wifi.WifiScreen
 import com.example.speedfinder.presentation.speedtest.SpeedTestScreen // <--- YE NAYA HAI
 import com.example.speedfinder.presentation.SettingsScreen
+import com.google.android.gms.ads.MobileAds
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        MobileAds.initialize(this) {}
         setContent {
             SpeedFinderApp()
         }

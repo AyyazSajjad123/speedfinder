@@ -15,7 +15,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView // ✅ Import Added
 import com.example.speedfinder.data.WifiScanner
+import com.google.android.gms.ads.AdRequest      // ✅ Import Added
+import com.google.android.gms.ads.AdSize         // ✅ Import Added
+import com.google.android.gms.ads.AdView         // ✅ Import Added
 import kotlinx.coroutines.launch
 
 @Composable
@@ -45,7 +49,7 @@ fun WifiScreen() {
                 if (!isScanning) {
                     isScanning = true
                     statusText = "Scanning Network... (Please wait)"
-                    deviceList = emptyList() // Purani list saaf karo
+                    deviceList = emptyList()
 
                     scope.launch {
                         val results = scanner.scanNetwork()
@@ -73,15 +77,31 @@ fun WifiScreen() {
         Text(statusText, fontSize = 14.sp, color = if (isScanning) Color.Blue else Color.Black)
         Spacer(modifier = Modifier.height(20.dp))
 
-        // DEVICE LIST
+        // DEVICE LIST (Weight use kiya taake Ad neeche rahe aur List beech mein)
         LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f), // ✅ List baki jagah le legi
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             items(deviceList) { deviceIp ->
                 DeviceCard(deviceIp)
             }
         }
+
+        // ⬇️ BANNER AD (Sabse Neeche)
+        Spacer(modifier = Modifier.height(10.dp))
+        Text("Sponsored", fontSize = 10.sp, color = Color.Gray)
+        AndroidView(
+            factory = { ctx ->
+                AdView(ctx).apply {
+                    setAdSize(AdSize.BANNER)
+                    adUnitId = "ca-app-pub-3940256099942544/6300978111"
+                    loadAd(AdRequest.Builder().build())
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
     }
 }
 
@@ -92,24 +112,13 @@ fun DeviceCard(ip: String) {
         modifier = Modifier.fillMaxWidth()
     ) {
         Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.padding(16.dp).fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Icon
-            Box(
-                modifier = Modifier
-                    .size(40.dp)
-                    .background(Color.LightGray, shape = MaterialTheme.shapes.small),
-                contentAlignment = Alignment.Center
-            ) {
+            Box(modifier = Modifier.size(40.dp).background(Color.LightGray, shape = MaterialTheme.shapes.small), contentAlignment = Alignment.Center) {
                 Text("📱", fontSize = 20.sp)
             }
-
             Spacer(modifier = Modifier.width(16.dp))
-
-            // Details
             Column {
                 Text("Connected Device", fontWeight = FontWeight.Bold)
                 Text(ip, color = Color.DarkGray)
