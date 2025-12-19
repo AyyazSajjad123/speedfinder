@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "597869594020",
+    "project_id": "speedfinder-d5a65",
+    "storage_bucket": "speedfinder-d5a65.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:597869594020:android:a1d6d98a387898f57bed31",
+        "android_client_info": {
+          "package_name": "com.example.speedfinder"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCAyvluTMRSDW5G_ejcPpUgdOFk60IsWVQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
