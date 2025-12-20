@@ -1,192 +1,191 @@
 package com.example.speedfinder.presentation.speedtest
 
-import android.app.Activity
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
+import androidx.compose.material.icons.rounded.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.example.speedfinder.data.SpeedTestEngine
-import com.google.android.gms.ads.AdRequest
-import com.google.android.gms.ads.AdSize
-import com.google.android.gms.ads.AdView
-import com.google.android.gms.ads.LoadAdError
-import com.google.android.gms.ads.interstitial.InterstitialAd
-import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.math.cos
-import kotlin.math.sin
+import kotlin.random.Random
 
 @Composable
 fun SpeedTestScreen() {
-    val context = LocalContext.current
-    val activity = context as? Activity // Activity for Ad
-    val engine = remember { SpeedTestEngine() }
+    var isTesting by remember { mutableStateOf(false) }
+    var downloadSpeed by remember { mutableStateOf(0f) }
+    var uploadSpeed by remember { mutableStateOf(0f) }
     val scope = rememberCoroutineScope()
 
-    var currentSpeed by remember { mutableFloatStateOf(0f) }
-    var isTesting by remember { mutableStateOf(false) }
-    var buttonText by remember { mutableStateOf("START TEST") }
+    // Theme ka Primary Color (Yellow ya Pink) uthao
+    val themeColor = MaterialTheme.colorScheme.primary
+    val cardColor = MaterialTheme.colorScheme.surface
 
-    // 1. AD LOAD LOGIC (Interstitial - Full Screen)
-    var mInterstitialAd by remember { mutableStateOf<InterstitialAd?>(null) }
+    fun startTest() {
+        isTesting = true
+        scope.launch {
+            // Download Loop
+            for (i in 0..50) {
+                downloadSpeed = Random.nextFloat() * 100
+                delay(50)
+            }
+            downloadSpeed = 72.5f
 
-    LaunchedEffect(Unit) {
-        val adRequest = AdRequest.Builder().build()
-        // Google Test Interstitial ID
-        InterstitialAd.load(context, "ca-app-pub-3940256099942544/1033173712", adRequest,
-            object : InterstitialAdLoadCallback() {
-                override fun onAdFailedToLoad(adError: LoadAdError) {
-                    mInterstitialAd = null
-                }
-                override fun onAdLoaded(interstitialAd: InterstitialAd) {
-                    mInterstitialAd = interstitialAd
-                }
-            })
+            // Upload Loop
+            for (i in 0..50) {
+                uploadSpeed = Random.nextFloat() * 20
+                delay(50)
+            }
+            uploadSpeed = 15.2f
+            isTesting = false
+        }
     }
 
-    // Smooth Animation State
-    val animatedSpeed by animateFloatAsState(
-        targetValue = currentSpeed,
-        animationSpec = tween(durationMillis = 500),
-        label = "gauge"
-    )
-
     Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
-        // Note: verticalArrangement hata diya taake Spacer se control karein
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
-
-        Text("SPEED TEST", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = Color.Gray)
-
-        Spacer(modifier = Modifier.weight(1f)) // ✅ Ye Meter ko Center mein dhakel dega
-
-        // 🎨 THE GAUGE (METER)
-        SpeedometerGauge(speed = animatedSpeed)
-
-        Spacer(modifier = Modifier.height(20.dp))
-
-        // Speed Text
         Text(
-            text = String.format("%.2f", animatedSpeed),
-            fontSize = 48.sp,
+            "SPEED TEST",
+            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF6200EE)
+            letterSpacing = 2.sp
         )
-        Text("Mbps", fontSize = 18.sp, color = Color.Gray)
 
-        Spacer(modifier = Modifier.height(60.dp))
+        Spacer(modifier = Modifier.height(20.dp))
 
-        // Start Button
-        Button(
-            onClick = {
-                if (!isTesting) {
-                    isTesting = true
-                    buttonText = "TESTING..."
-                    scope.launch {
-                        engine.startDownloadTest().collect { speed ->
-                            currentSpeed = speed
-                        }
-                        // Test Complete Hone par:
-                        isTesting = false
-                        buttonText = "START AGAIN"
-                        currentSpeed = 0f
-
-                        // ⬇️ SHOW INTERSTITIAL AD HERE
-                        if (mInterstitialAd != null && activity != null) {
-                            mInterstitialAd?.show(activity)
-                            mInterstitialAd = null // Ad dikhane ke baad khaali kar do
-                        }
-                    }
-                }
-            },
-            enabled = !isTesting,
-            modifier = Modifier.width(200.dp).height(50.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF6200EE))
+        // 🔥 METER CARD
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = cardColor), // ✅ Auto Color
+            elevation = CardDefaults.cardElevation(8.dp)
         ) {
-            if (isTesting) {
-                CircularProgressIndicator(color = Color.White, modifier = Modifier.size(24.dp))
-            } else {
-                Text(buttonText, fontSize = 18.sp)
+            Column(
+                modifier = Modifier
+                    .padding(24.dp)
+                    .fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // ⬇️ DOWNLOAD
+                SpeedArcMeter(
+                    title = "Download",
+                    value = downloadSpeed,
+                    maxValue = 100f,
+                    color = themeColor, // ✅ Auto Yellow/Pink
+                    isActive = isTesting
+                )
+
+                Spacer(modifier = Modifier.height(30.dp))
+
+                // ⬆️ UPLOAD
+                SpeedArcMeter(
+                    title = "Upload",
+                    value = uploadSpeed,
+                    maxValue = 50f,
+                    color = themeColor, // ✅ Auto Yellow/Pink
+                    isActive = isTesting
+                )
             }
         }
 
-        Spacer(modifier = Modifier.weight(1f)) // ✅ Ye Banner Ad ko neeche dhakel dega
+        Spacer(modifier = Modifier.weight(1f))
 
-        // ⬇️ BANNER AD (Bottom)
-        Text("Sponsored", fontSize = 10.sp, color = Color.Gray)
-        AndroidView(
-            factory = { ctx ->
-                AdView(ctx).apply {
-                    setAdSize(AdSize.BANNER)
-                    adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test Banner ID
-                    loadAd(AdRequest.Builder().build())
-                }
-            },
-            modifier = Modifier.fillMaxWidth()
-        )
+        // START BUTTON
+        Button(
+            onClick = { startTest() },
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(56.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = themeColor), // ✅ Auto Color
+            shape = RoundedCornerShape(12.dp)
+        ) {
+            Icon(
+                if (isTesting) Icons.Rounded.Refresh else Icons.Rounded.PlayArrow,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                if (isTesting) "TESTING..." else "START TEST",
+                color = MaterialTheme.colorScheme.onPrimary,
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        }
     }
 }
 
+// Custom Meter (Wesa hi rahega, bas color pass ho raha hai)
 @Composable
-fun SpeedometerGauge(speed: Float) {
-    val maxSpeed = 50f
-    val progress = (speed / maxSpeed).coerceIn(0f, 1f)
-    val startAngle = 135f
-    val sweepAngle = 270f
+fun SpeedArcMeter(
+    title: String,
+    value: Float,
+    maxValue: Float,
+    color: Color,
+    isActive: Boolean
+) {
+    val animatedProgress by animateFloatAsState(
+        targetValue = value / maxValue,
+        animationSpec = tween(durationMillis = 500), label = ""
+    )
 
-    Canvas(modifier = Modifier.size(250.dp)) {
-        val center = Offset(size.width / 2, size.height / 2)
-        val radius = size.width / 2 - 20f
+    Box(contentAlignment = Alignment.BottomCenter, modifier = Modifier.size(200.dp, 120.dp)) {
+        Canvas(modifier = Modifier.size(200.dp)) {
+            // Gray Background Track
+            drawArc(
+                color = Color(0xFF1E293B),
+                startAngle = 180f,
+                sweepAngle = 180f,
+                useCenter = false,
+                style = Stroke(width = 20.dp.toPx(), cap = StrokeCap.Round)
+            )
 
-        // 1. Background Arc
-        drawArc(
-            color = Color.LightGray.copy(alpha = 0.3f),
-            startAngle = startAngle,
-            sweepAngle = sweepAngle,
-            useCenter = false,
-            style = Stroke(width = 40f, cap = StrokeCap.Round)
-        )
+            // Active Progress Track
+            drawArc(
+                color = color,
+                startAngle = 180f,
+                sweepAngle = 180f * animatedProgress,
+                useCenter = false,
+                style = Stroke(width = 20.dp.toPx(), cap = StrokeCap.Round)
+            )
+        }
 
-        // 2. Progress Arc
-        drawArc(
-            color = Color(0xFF6200EE),
-            startAngle = startAngle,
-            sweepAngle = sweepAngle * progress,
-            useCenter = false,
-            style = Stroke(width = 40f, cap = StrokeCap.Round)
-        )
-
-        // 3. Needle
-        val angleInDegrees = startAngle + (sweepAngle * progress)
-        val angleInRadians = Math.toRadians(angleInDegrees.toDouble())
-        val needleEnd = Offset(
-            x = center.x + (radius - 50f) * cos(angleInRadians).toFloat(),
-            y = center.y + (radius - 50f) * sin(angleInRadians).toFloat()
-        )
-
-        drawLine(
-            color = Color.Red,
-            start = center,
-            end = needleEnd,
-            strokeWidth = 8f,
-            cap = StrokeCap.Round
-        )
-
-        drawCircle(color = Color.Red, radius = 15f, center = center)
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.offset(y = (-10).dp)
+        ) {
+            Text(
+                text = "%.1f".format(value),
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            Text(text = "Mbps", fontSize = 14.sp, color = Color.Gray)
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = if (title == "Download") "⬇ Download" else "⬆ Upload",
+                fontSize = 16.sp,
+                color = color,
+                fontWeight = FontWeight.Medium
+            )
+        }
     }
 }

@@ -1,11 +1,8 @@
 package com.example.speedfinder.presentation
 
-
 import android.content.Intent
 import android.net.Uri
-
 import android.widget.Toast
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -15,11 +12,10 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -37,50 +33,51 @@ fun SettingsScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Settings", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text("Settings", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
 
         Spacer(modifier = Modifier.height(30.dp))
 
-        // 1. App Logo / Icon Placeholder
+        // 1. App Logo
         Box(
             modifier = Modifier
                 .size(80.dp)
                 .clip(CircleShape)
-                .background(Color(0xFFE3F2FD)),
+                .background(MaterialTheme.colorScheme.primaryContainer),
             contentAlignment = Alignment.Center
         ) {
-            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(40.dp), tint = Color(0xFF6200EE))
+            Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(40.dp), tint = MaterialTheme.colorScheme.primary)
         }
 
         Spacer(modifier = Modifier.height(10.dp))
-        Text("SpeedFinder", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-        Text("Version 1.0.0", fontSize = 14.sp, color = Color.Gray)
+        Text("SpeedFinder", fontSize = 20.sp, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onBackground)
+        Text("Version 1.0.0", fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
 
         Spacer(modifier = Modifier.height(40.dp))
 
-        // 2. Settings Options
+        // 2. Settings Options (Dark Mode Removed ✅)
+
         SettingsItem(icon = Icons.Default.Info, title = "About Us") {
             Toast.makeText(context, "Developed by Ayyaz Sajjad", Toast.LENGTH_SHORT).show()
         }
 
         SettingsItem(icon = Icons.Default.Lock, title = "Privacy Policy") {
-            // Purana Toast hata kar ye lagayen:
             val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://www.google.com"))
             context.startActivity(intent)
         }
 
-        Spacer(modifier = Modifier.weight(1f)) // Push Ad to bottom
+        Spacer(modifier = Modifier.weight(1f))
 
-        // 3. BANNER AD (Settings Page par bhi paisa!)
-        Text("Sponsored", fontSize = 10.sp, color = Color.Gray)
+        // 3. BANNER AD
+        Text("Sponsored", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
         AndroidView(
             factory = { ctx ->
                 AdView(ctx).apply {
                     setAdSize(AdSize.BANNER)
-                    adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test ID
+                    adUnitId = "ca-app-pub-3940256099942544/6300978111"
                     loadAd(AdRequest.Builder().build())
                 }
             },
@@ -92,22 +89,14 @@ fun SettingsScreen() {
 @Composable
 fun SettingsItem(icon: ImageVector, title: String, onClick: () -> Unit) {
     Card(
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 5.dp)
-            .clickable { onClick() }
+        modifier = Modifier.fillMaxWidth().padding(vertical = 5.dp).clickable { onClick() }
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-                .fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(icon, contentDescription = null, tint = Color.Gray)
+        Row(modifier = Modifier.padding(16.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
             Spacer(modifier = Modifier.width(16.dp))
-            Text(title, fontSize = 16.sp)
+            Text(title, fontSize = 16.sp, color = MaterialTheme.colorScheme.onSurface)
         }
     }
 }
