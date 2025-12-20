@@ -49,10 +49,10 @@ fun SettingsScreen(
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
     ) {
-        // 📜 SCROLLABLE CONTENT (Weight 1f taake Ad neechay rahe)
+        // 📜 SCROLLABLE CONTENT
         Column(
             modifier = Modifier
-                .weight(1f) // Baki sari jagah ye le le
+                .weight(1f)
                 .padding(16.dp)
                 .verticalScroll(scrollState)
         ) {
@@ -126,17 +126,25 @@ fun SettingsScreen(
             // 2️⃣ SECTION: SUPPORT
             SettingsSectionTitle("Support")
 
-            // Rate Us
+            // Rate Us (REAL LOGIC - Opens Play Store)
             SettingsActionItem(
                 icon = Icons.Rounded.Star,
                 title = "Rate Us",
                 subtitle = "Love the app? Let us know!",
-                onClick = { Toast.makeText(context, "Redirecting to Play Store...", Toast.LENGTH_SHORT).show() }
+                onClick = {
+                    try {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                        context.startActivity(intent)
+                    } catch (e: Exception) {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                        context.startActivity(intent)
+                    }
+                }
             )
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Share App
+            // Share App (✅ UPDATED: Professional Link Sharing)
             SettingsActionItem(
                 icon = Icons.Rounded.Share,
                 title = "Share SpeedFinder",
@@ -146,12 +154,12 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Privacy Policy
+            // Privacy Policy (Placeholder Link)
             SettingsActionItem(
                 icon = Icons.Rounded.Lock,
                 title = "Privacy Policy",
                 subtitle = "Important for your security",
-                onClick = { openWebPage(context, "https://www.google.com") } // Testing Link
+                onClick = { openWebPage(context, "https://sites.google.com/view/speedfinder-policy/home") }
             )
 
             Spacer(modifier = Modifier.height(24.dp))
@@ -174,8 +182,7 @@ fun SettingsScreen(
             }
         }
 
-        // 💰 ADMOB BANNER (Fixed at Bottom)
-        // Yahan Padding di hai taake bilkul edge se na chipke
+        // 💰 ADMOB BANNER
         Column(modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp)) {
             AdMobBanner()
         }
@@ -242,7 +249,6 @@ fun IconBox(icon: ImageVector) {
     }
 }
 
-// 💰 ADMOB HELPER
 @Composable
 fun AdMobBanner() {
     AndroidView(
@@ -250,7 +256,7 @@ fun AdMobBanner() {
         factory = { context ->
             AdView(context).apply {
                 setAdSize(AdSize.BANNER)
-                adUnitId = "ca-app-pub-3940256099942544/6300978111" // Test ID
+                adUnitId = "ca-app-pub-3940256099942544/6300978111"
                 loadAd(AdRequest.Builder().build())
             }
         }
@@ -258,11 +264,25 @@ fun AdMobBanner() {
 }
 
 // 🔗 HELPER FUNCTIONS
+
+// ✅ Updated Share Function (Ab Link bhi bhejega)
 fun shareApp(context: Context) {
+    val appPackageName = context.packageName
+    val playStoreLink = "https://play.google.com/store/apps/details?id=$appPackageName"
+
+    val shareMessage = """
+        Hey! Check out SpeedFinder 🚀
+        
+        It's the best app to test internet speed & scan WiFi devices.
+        
+        Download here:
+        $playStoreLink
+    """.trimIndent()
+
     val intent = Intent(Intent.ACTION_SEND).apply {
         type = "text/plain"
-        putExtra(Intent.EXTRA_SUBJECT, "Check out SpeedFinder!")
-        putExtra(Intent.EXTRA_TEXT, "Download SpeedFinder to test your internet speed & scan WiFi!")
+        putExtra(Intent.EXTRA_SUBJECT, "Download SpeedFinder")
+        putExtra(Intent.EXTRA_TEXT, shareMessage)
     }
     context.startActivity(Intent.createChooser(intent, "Share via"))
 }

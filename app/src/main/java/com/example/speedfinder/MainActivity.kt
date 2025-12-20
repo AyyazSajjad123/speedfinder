@@ -7,7 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack // 👈 Back Arrow Import
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -26,7 +26,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -37,12 +36,22 @@ import com.example.speedfinder.presentation.dashboard.DashboardScreen
 import com.example.speedfinder.presentation.speedtest.SpeedTestScreen
 import com.example.speedfinder.presentation.wifi.WifiScreen
 import com.example.speedfinder.ui.theme.SpeedFinderTheme
+import com.google.android.gms.ads.MobileAds // 👈 Import Added
+import kotlinx.coroutines.CoroutineScope // 👈 Import Added
+import kotlinx.coroutines.Dispatchers // 👈 Import Added
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // 🚀 FIX: Ads ko Background Thread par load kar rahe hain
+        // Taake Splash Screen foran show ho aur App Hang na kare
+        CoroutineScope(Dispatchers.IO).launch {
+            MobileAds.initialize(this@MainActivity)
+        }
+
         setContent {
             val context = LocalContext.current
             val themeManager = remember { ThemeManager(context) }
@@ -51,9 +60,9 @@ class MainActivity : ComponentActivity() {
             // Splash Screen State
             var showSplash by remember { mutableStateOf(true) }
 
-            // 2 Seconds Timer
+            // 2 Seconds Timer (Visual Splash)
             LaunchedEffect(Unit) {
-                delay(2000)
+                delay(1000)
                 showSplash = false
             }
 
@@ -124,7 +133,7 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
-                            .scale(1.5f), // ⬅️ Zoom Control (1.5x)
+                            .scale(1.5f),
                         contentScale = ContentScale.Fit
                     )
                 }
@@ -207,17 +216,13 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
                 composable("dashboard") { DashboardScreen() }
                 composable("wifi") { WifiScreen() }
                 composable("speedtest") { SpeedTestScreen() }
-// ... NavHost ke andar ...
-
-                // ... NavHost ke andar ...
-
                 composable("settings") {
                     SettingsScreen(
                         isDarkMode = isDarkMode,
-                        // 👇👇👇 YAHAN CHANGE KIYA HAI 👇👇👇
                         onThemeToggle = { onThemeToggle() }
                     )
-                }           }
+                }
+            }
         }
     }
 }
