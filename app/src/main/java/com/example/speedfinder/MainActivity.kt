@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack // 👈 Back Arrow Import
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
@@ -58,10 +59,10 @@ class MainActivity : ComponentActivity() {
 
             SpeedFinderTheme(darkTheme = isDarkMode) {
                 if (showSplash) {
-                    // ✨ 1. SPLASH SCREEN (White Background, Big Logo)
+                    // ✨ 1. SPLASH SCREEN
                     SplashScreen()
                 } else {
-                    // 🏠 2. MAIN APP (Sidebar with Transparent Logo)
+                    // 🏠 2. MAIN APP
                     MainAppStructure(
                         isDarkMode = isDarkMode,
                         onThemeToggle = { themeManager.toggleTheme() }
@@ -98,6 +99,8 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
     val navController = rememberNavController()
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    // ✅ Route Checker (Back Arrow ke liye)
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = navBackStackEntry?.destination?.route ?: "dashboard"
 
@@ -108,24 +111,20 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
                 modifier = Modifier.width(300.dp),
                 drawerContainerColor = MaterialTheme.colorScheme.surface,
             ) {
-                // 🔥 SIDEBAR HEADER (Box ka size wahi hai: 220.dp)
+                // 🔥 SIDEBAR HEADER (Zoomed Logo)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(220.dp) // 👈 Box ki height UTNI HI HAI.
+                        .height(220.dp)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
-                    // ✅ IMAGE KO ZOOM KIYA
                     Image(
                         painter = painterResource(id = R.drawable.app_logo),
                         contentDescription = null,
                         modifier = Modifier
                             .fillMaxSize()
-                            // 👇👇👇 YE LINE ADD KAREIN 👇👇👇
-                            .scale(1.5f), // ⬅️ Yahan se Zoom control hoga. (1.5f matlab 50% zyada zoom)
-                        // 👆👆👆 YE LINE ADD KAREIN 👆👆👆
-
+                            .scale(1.5f), // ⬅️ Zoom Control (1.5x)
                         contentScale = ContentScale.Fit
                     )
                 }
@@ -134,16 +133,20 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
 
                 // Navigation Items
                 DrawerItem(Icons.Default.Home, "Home", currentRoute == "dashboard") {
-                    navController.navigate("dashboard"); scope.launch { drawerState.close() }
+                    navController.navigate("dashboard") { launchSingleTop = true }
+                    scope.launch { drawerState.close() }
                 }
                 DrawerItem(Icons.Rounded.NetworkCheck, "Speed Test", currentRoute == "speedtest") {
-                    navController.navigate("speedtest"); scope.launch { drawerState.close() }
+                    navController.navigate("speedtest") { launchSingleTop = true }
+                    scope.launch { drawerState.close() }
                 }
                 DrawerItem(Icons.Rounded.WifiFind, "WiFi Spy", currentRoute == "wifi") {
-                    navController.navigate("wifi"); scope.launch { drawerState.close() }
+                    navController.navigate("wifi") { launchSingleTop = true }
+                    scope.launch { drawerState.close() }
                 }
                 DrawerItem(Icons.Default.Settings, "Settings", currentRoute == "settings") {
-                    navController.navigate("settings"); scope.launch { drawerState.close() }
+                    navController.navigate("settings") { launchSingleTop = true }
+                    scope.launch { drawerState.close() }
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -160,7 +163,7 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(Icons.Filled.WbSunny, contentDescription = "Theme", tint = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text(if (isDarkMode) "Dark Mode" else "Light Mode", fontWeight = FontWeight.SemiBold)
+                        Text(if (isDarkMode) "Dark Mode" else "Light Mode", fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.onSurface)
                     }
                     Switch(checked = isDarkMode, onCheckedChange = { onThemeToggle() })
                 }
@@ -172,13 +175,26 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
                 CenterAlignedTopAppBar(
                     title = { Text("SpeedFinder", fontWeight = FontWeight.Bold) },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        // ✅ BACK ARROW LOGIC
+                        if (currentRoute == "dashboard") {
+                            // Dashboard par MENU Button
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                            }
+                        } else {
+                            // Doosre pages par BACK ARROW
+                            IconButton(onClick = { navController.popBackStack() }) {
+                                Icon(
+                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                    contentDescription = "Back"
+                                )
+                            }
                         }
                     },
                     colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
                         containerColor = MaterialTheme.colorScheme.background,
-                        titleContentColor = MaterialTheme.colorScheme.onBackground
+                        titleContentColor = MaterialTheme.colorScheme.onBackground,
+                        navigationIconContentColor = MaterialTheme.colorScheme.onBackground
                     )
                 )
             }
@@ -191,8 +207,17 @@ fun MainAppStructure(isDarkMode: Boolean, onThemeToggle: () -> Unit) {
                 composable("dashboard") { DashboardScreen() }
                 composable("wifi") { WifiScreen() }
                 composable("speedtest") { SpeedTestScreen() }
-                composable("settings") { SettingsScreen() }
-            }
+// ... NavHost ke andar ...
+
+                // ... NavHost ke andar ...
+
+                composable("settings") {
+                    SettingsScreen(
+                        isDarkMode = isDarkMode,
+                        // 👇👇👇 YAHAN CHANGE KIYA HAI 👇👇👇
+                        onThemeToggle = { onThemeToggle() }
+                    )
+                }           }
         }
     }
 }
@@ -204,6 +229,14 @@ fun DrawerItem(icon: ImageVector, label: String, selected: Boolean, onClick: () 
         label = { Text(label) },
         selected = selected,
         onClick = onClick,
-        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding),
+        colors = NavigationDrawerItemDefaults.colors(
+            selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+            unselectedContainerColor = Color.Transparent,
+            selectedIconColor = MaterialTheme.colorScheme.primary,
+            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+            selectedTextColor = MaterialTheme.colorScheme.primary,
+            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     )
 }
